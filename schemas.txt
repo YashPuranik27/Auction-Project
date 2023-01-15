@@ -1,0 +1,96 @@
+//all data types are to be edited based on the code.
+
+
+CREATE TABLE `users` (
+  `username` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `address` varchar(30) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `account_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`username`)
+)
+
+CREATE TABLE `admin` (
+  `username` varchar(30) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  PRIMARY KEY (`username`),
+  CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`)
+)
+
+CREATE TABLE `customerrep` (
+  `username` varchar(30) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  PRIMARY KEY (`username`),
+  CONSTRAINT `customerrep_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`)
+)
+  
+CREATE TABLE `questions` (
+  `question_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) DEFAULT NULL,
+  `customerrep_username` varchar(50) DEFAULT NULL,
+  `user_questions` varchar(300) DEFAULT NULL,
+  `answers` varchar(300) DEFAULT NULL,
+  PRIMARY KEY (`question_id`),
+  KEY `username` (`username`),
+  KEY `customerrep_username` (`customerrep_username`),
+  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE,
+  CONSTRAINT `questions_ibfk_2` FOREIGN KEY (`customerrep_username`) REFERENCES `customerrep` (`username`) ON DELETE CASCADE
+)
+
+CREATE TABLE `bid` (
+  `bid_id` int NOT NULL AUTO_INCREMENT,
+  `buyer` varchar(50) DEFAULT NULL,
+  `upper_limit` float DEFAULT '0',
+  `is_autobid` tinyint(1) DEFAULT '0',
+  `bid_increment` float DEFAULT '0',
+  `amount` float DEFAULT '0',
+  `auction_id` int DEFAULT NULL,
+  PRIMARY KEY (`bid_id`),
+  KEY `buyer` (`buyer`),
+  KEY `auction_id` (`auction_id`),
+  CONSTRAINT `bid_ibfk_1` FOREIGN KEY (`buyer`) REFERENCES `users` (`username`),
+  CONSTRAINT `bid_ibfk_2` FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE
+)
+
+CREATE TABLE `auction` (
+  `auction_id` int NOT NULL AUTO_INCREMENT,
+  `item_id` int DEFAULT NULL,
+  `seller` varchar(50) DEFAULT NULL,
+  `new_bid_increment` float DEFAULT '1',
+  `min_price` float DEFAULT '0',
+  `price` float DEFAULT '0',
+  `status` varchar(10) DEFAULT NULL,
+  `start_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `end_date` datetime DEFAULT NULL,
+  `winner` varchar(20) DEFAULT NULL,
+  `current_bid` float DEFAULT '0',
+  PRIMARY KEY (`auction_id`),
+  KEY `seller` (`seller`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `auction_ibfk_1` FOREIGN KEY (`seller`) REFERENCES `item` (`seller`) ON DELETE CASCADE,
+  CONSTRAINT `auction_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE
+)
+
+CREATE TABLE salesreports (
+best_selling_enduser varchar(15),
+best_selling_item varchar(15), 
+earnings_per_seller int,
+earnings_per_buyer int, 
+earnings_per_item_type int, 
+earnings_per_item int, 
+total_earnings int); 
+
+customer_rep_has_users (user_id int, employee_id int), primary key(user_id,employee_id), foreign key(user_id) references users (user_id), foreign key(employee_id) references customer_representative (employee_id));
+
+admin_has_customer_representative(admin_id int, employee_id int, primary key(admin_id), foreign key (employee_id) references customer_representative (employee_id) NOT NULL);
+
+auto_bid_updates_bid (upper_limit float, bid_id int, foreign key (upper_limit) references users (upper_limit) NOT NULL, foreign key (bid_id) references bid (bid_id) NOT NULL);
+
+users_make_trades(user_id int, trade_id int, primary key(user_id, trade_id), foreign key (user_id) references users (user_id), foreign key (trade_id) references trades (trade_id));
+
+customer_rep_deals_auction (auction_id int, employee_id int, primary key(auction_id, employee_id), foreign key(auction_id) references auction (auction_id) , foreign key(employee_id) references customer_representative (employee_id));
+
+bid_submitbid_auction(bid_id int, auction_id int, primary key(bid_id, auction_id), foreign key (bid_id) references bid (bid_id), foreign key (auction_id) references auction (auction_id));
+
+trades_checks_autobid(trade_id:varchar(15), primary key (trade_id), foreign key (trade_id) references trades (trade_id));
